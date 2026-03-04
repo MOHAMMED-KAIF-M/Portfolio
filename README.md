@@ -23,6 +23,29 @@ Run
 python app.py
 ```
 
+Deploy (Render - Recommended)
+-----------------------------
+
+This project is a Flask backend app, so deploy it as a Python web service (not Netlify static hosting).
+
+1. Push this repo to GitHub.
+2. In Render, choose **New +** -> **Blueprint**.
+3. Select this repository (`render.yaml` is already included).
+4. Deploy.
+5. In Render service settings, keep environment variables set:
+   - `FLASK_SECRET_KEY`
+   - `PORTFOLIO_ADMIN_TOKEN`
+
+Start command used by Render:
+
+```bash
+gunicorn app:app
+```
+
+Important storage note:
+- On free/ephemeral hosting, uploaded images/certificates and edited profile data can reset on restart/redeploy.
+- For persistent edits, use persistent disk/database/object storage.
+
 Endpoints
 ---------
 - `/` : Home

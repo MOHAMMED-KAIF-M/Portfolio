@@ -1,0 +1,15 @@
+services:
+  - type: web
+    name: portfolio-mohammed-kaif
+    runtime: python
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn app:app
+    autoDeploy: true
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.10
+      - key: FLASK_SECRET_KEY
+        generateValue: true
+      - key: PORTFOLIO_ADMIN_TOKEN
+        generateValue: true
