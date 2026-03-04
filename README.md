@@ -49,11 +49,8 @@ Important storage note:
 Endpoints
 ---------
 - `/` : Home
-- `/view` : Embedded PDF viewer
 - `/resume` : Download resume PDF
-- `/score` : Run a basic ATS-friendly score and view breakdown
 
 Notes
 -----
 - The UI can be swapped to use a specific Gemini UI library if you provide a link; currently it uses the included CSS which is lightweight and responsive.
-- The ATS scorer uses simple heuristics (contact info, common sections, keywords, length). It is not a replacement for a commercial ATS but useful for quick checks.

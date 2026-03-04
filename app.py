@@ -1,9 +1,7 @@
-from flask import Flask, render_template, send_from_directory, abort, url_for, jsonify, request, redirect, session
+from flask import Flask, render_template, send_from_directory, abort, request, redirect, session
 import os
 import re
 import base64
-from PyPDF2 import PdfReader
-import shutil
 import json
 import hmac
 import uuid
@@ -470,23 +468,6 @@ def ensure_data_dir():
         os.makedirs(DATA_DIR)
 
 
-def ensure_resume_in_static():
-    """Ensure a resume PDF exists at static/resume.pdf. If not, copy any PDF from project root into static."""
-    static_resume = os.path.join(app.static_folder, 'resume.pdf')
-    if os.path.exists(static_resume):
-        return static_resume
-    root = os.path.dirname(os.path.abspath(__file__))
-    pdfs = [f for f in os.listdir(root) if f.lower().endswith('.pdf')]
-    if pdfs:
-        src = os.path.join(root, pdfs[0])
-        try:
-            shutil.copy2(src, static_resume)
-            return static_resume
-        except Exception:
-            return None
-    return None
-
-
 def get_profile_image_filename():
     """Return a filename in the static folder for the profile image if present, else default to profile.svg"""
     static_files = os.listdir(app.static_folder)
@@ -512,79 +493,19 @@ def get_profile_image_version(file_name):
             return '0'
 
 
-def extract_text_from_pdf(path):
-    try:
-        reader = PdfReader(path)
-        text = []
-        for page in reader.pages:
-            page_text = page.extract_text()
-            if page_text:
-                text.append(page_text)
-        return "\n".join(text)
-    except Exception:
-        return ""
-
-
-def score_resume(text):
-    # Basic ATS-friendly heuristics
-    score = 0
-    details = {}
-
-    # Contact info
-    email_match = re.search(r"[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}", text)
-    phone_match = re.search(r"\+?\d[\d\s\-()]{7,}\d", text)
-    details['has_email'] = bool(email_match)
-    details['has_phone'] = bool(phone_match)
-    score += 15 if details['has_email'] else 0
-    score += 10 if details['has_phone'] else 0
-
-    # Sections
-    sections = ['experience', 'education', 'skills', 'projects', 'summary', 'contact']
-    found_sections = [s for s in sections if s in text.lower()]
-    details['found_sections'] = found_sections
-    score += min(30, 6 * len(found_sections))
-
-    # Length (words)
-    words = re.findall(r"\w+", text)
-    wc = len(words)
-    details['word_count'] = wc
-    if wc >= 400:
-        score += 20
-    elif wc >= 200:
-        score += 12
-    else:
-        score += 6
-
-    # Keywords (sample tech keywords)
-    keywords = ['python', 'flask', 'django', 'aws', 'azure', 'sql', 'javascript', 'react', 'docker', 'kubernetes', 'git']
-    matches = [k for k in keywords if k in text.lower()]
-    details['keywords_found'] = matches
-    score += min(25, 5 * len(matches))
-
-    # Normalize to 0-100
-    final = int(min(100, score))
-    details['score'] = final
-    return details
-
-
 @app.route('/')
 def index():
     ensure_data_dir()
-    resume_exists = os.path.exists(os.path.join(app.static_folder, 'resume.pdf'))
     profile = load_profile_data()
     profile_image = get_profile_image_filename()
     profile_image_version = get_profile_image_version(profile_image)
     can_edit = can_access_admin()
-    # flag used to display a small confirmation message after saving
-    saved_flag = request.args.get('saved') == '1'
     return render_template(
         'home.html',
-        resume_exists=resume_exists,
         profile=profile,
         profile_image=profile_image,
         profile_image_version=profile_image_version,
-        can_edit=can_edit,
-        saved=saved_flag
+        can_edit=can_edit
     )
 
 
@@ -599,108 +520,6 @@ def resume():
     if pdfs:
         return send_from_directory(root, pdfs[0], as_attachment=True)
     abort(404)
-
-
-@app.route('/view')
-def view_resume():
-    # ensure resume is available in static (copy fallback if needed)
-    resume_path = ensure_resume_in_static()
-    if resume_path and os.path.exists(resume_path):
-        return redirect(url_for('static', filename='resume.pdf'))
-    abort(404)
-
-
-@app.route('/score')
-def score():
-    # ensure resume is available in static
-    resume_path = ensure_resume_in_static()
-    if not resume_path or not os.path.exists(resume_path):
-        return jsonify({'error': 'resume not found'}), 404
-    text = extract_text_from_pdf(resume_path)
-    details = score_resume(text)
-    return jsonify(details)
-
-
-@app.route('/upload_resume', methods=['POST'])
-@admin_required
-def upload_resume():
-    file = request.files.get('resume')
-    if not file:
-        return redirect('/')
-    filename = 'resume.pdf'
-    dest = os.path.join(app.static_folder, filename)
-    try:
-        file.save(dest)
-    except Exception:
-        pass
-    return redirect(url_for('view_resume'))
-
-
-@app.route('/upload_image', methods=['POST'])
-@admin_required
-def upload_image():
-    file = request.files.get('image')
-    if not file:
-        return redirect('/')
-    fname = file.filename or ''
-    ext = fname.rsplit('.', 1)[-1].lower() if '.' in fname else ''
-    if ext not in ('png', 'jpg', 'jpeg', 'svg', 'webp'):
-        return redirect('/admin')
-    dest_name = f'profile.{ext}'
-    dest = os.path.join(app.static_folder, dest_name)
-    # remove existing profile.* files to avoid duplicates
-    for f in os.listdir(app.static_folder):
-        if f.startswith('profile.'):
-            try:
-                os.remove(os.path.join(app.static_folder, f))
-            except Exception:
-                pass
-    try:
-        file.save(dest)
-    except Exception:
-        pass
-    # If AJAX request, return JSON with URL (add cache-busting param)
-    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
-        import time
-        url = url_for('static', filename=dest_name) + '?v=' + str(int(time.time()))
-        return jsonify({'success': True, 'url': url})
-    return redirect('/')
-
-
-@app.route('/save_profile', methods=['POST'])
-@admin_required
-def save_profile():
-    # request imported at module level
-    ensure_data_dir()
-    profile = load_profile_data()
-    profile['name'] = request.form.get('name', profile['name']).strip()
-    profile['tagline'] = request.form.get('tagline', profile['tagline']).strip()
-    profile['about'] = request.form.get('about', profile['about']).strip()
-    profile['contact']['email'] = request.form.get('email', profile['contact']['email']).strip()
-    new_experiences = extract_experiences_from_form(request.form)
-    if new_experiences is not None:
-        profile['experiences'] = new_experiences
-    new_projects = extract_projects_from_form(request.form)
-    if new_projects is not None:
-        profile['projects'] = new_projects
-    new_skills = extract_skills_from_form(request.form)
-    if new_skills is not None:
-        profile['skills'] = new_skills
-    new_certificates = process_certificates_from_request(
-        request.form,
-        request.files,
-        profile.get('certificates', [])
-    )
-    if new_certificates is not None:
-        profile['certificates'] = new_certificates
-    try:
-        with open(PROFILE_PATH, 'w', encoding='utf-8') as f:
-            json.dump(profile, f, indent=2)
-    except Exception:
-        pass
-    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
-        return jsonify({'success': True})
-    return redirect('/')
 
 
 @app.route('/edit')
