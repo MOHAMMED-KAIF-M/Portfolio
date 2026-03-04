@@ -1,0 +1,155 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Portfolio-Mohammed Kaif M</title>
+    <link rel="stylesheet" href="/static/style.css">
+  </head>
+  <body>
+    <nav class="nav">
+      <div class="container nav-inner">
+        <a class="brand" href="/">Portfolio-Mohammed Kaif M</a>
+        <div class="nav-actions">
+          <a class="resume-link nav-pill" href="/resume">Download Resume</a>
+          <a class="resume-link nav-pill" href="/static/resume.pdf" target="_blank">View Resume</a>
+        </div>
+      </div>
+    </nav>
+
+    <main class="container">
+      <section class="hero">
+        <div class="hero-left">
+          <h1 id="displayName">{{ profile.name or 'Mohammed Kaif M' }}</h1>
+          <p class="tagline" id="displayTag">{{ profile.tagline or 'AI/ML engineer' }}</p>
+        </div>
+        <div class="hero-right">
+          <img id="heroImage" src="/static/{{ profile_image if profile_image else 'profile.svg' }}?v={{ profile_image_version if profile_image_version else '0' }}" alt="Profile image" />
+          {% if can_edit %}
+            <div class="hero-edit-link">
+              <a href="/edit" class="resume-link nav-pill">Edit Profile</a>
+            </div>
+          {% endif %}
+        </div>
+      </section>
+
+      <section class="card">
+        <h2>About</h2>
+        <div id="displayAbout">{{ profile.about|safe if profile.about else 'Brief summary about you. Replace this text in the profile editor below.' }}</div>
+      </section>
+
+      <section class="card">
+        <h2>Experience</h2>
+        {% if profile.experiences and profile.experiences|length > 0 %}
+          <div id="displayExperience">
+            {% for item in profile.experiences %}
+              <div class="experience-display-item">
+                {% if item['from'] or item['to'] %}
+                  <p class="experience-dates">
+                    {% if item['from'] %}From: {{ item['from'] }}{% endif %}
+                    {% if item['to'] %}{% if item['from'] %} | {% endif %}To: {{ item['to'] }}{% endif %}
+                  </p>
+                {% endif %}
+                <p>{{ item.summary if item.summary else 'Experience details added.' }}</p>
+              </div>
+            {% endfor %}
+          </div>
+        {% else %}
+          <p id="displayExperience">List roles and achievements from your resume here.</p>
+        {% endif %}
+      </section>
+
+      <section class="card">
+        <h2>Projects</h2>
+        {% if profile.projects and profile.projects|length > 0 %}
+          <div id="displayProjects">
+            {% for item in profile.projects %}
+              <div class="project-display-item">
+                {% if item['title'] %}
+                  <p class="project-title">{{ item['title'] }}</p>
+                {% endif %}
+                {% if item['link'] %}
+                  <p class="project-link">
+                    <a href="{{ item['link'] }}" target="_blank" rel="noopener noreferrer">{{ item['link'] }}</a>
+                  </p>
+                {% endif %}
+                {% if item['description'] %}
+                  <p>{{ item['description'] }}</p>
+                {% endif %}
+              </div>
+            {% endfor %}
+          </div>
+        {% else %}
+          <p id="displayProjects">Add project links, descriptions, and technologies used.</p>
+        {% endif %}
+      </section>
+
+      <section class="card">
+        <h2>Skills</h2>
+        {% if profile.skills and profile.skills|length > 0 %}
+          <div id="displaySkills">
+            {% for item in profile.skills %}
+              <div class="skill-display-item">
+                <p class="skill-name">
+                  {% if item['name'] %}{{ item['name'] }}{% else %}Skill{% endif %}
+                  {% if item['level'] %}<span class="skill-level"> - {{ item['level'] }}</span>{% endif %}
+                </p>
+                {% if item['details'] %}
+                  <p>{{ item['details'] }}</p>
+                {% endif %}
+              </div>
+            {% endfor %}
+          </div>
+        {% else %}
+          <p id="displaySkills">Add your technical and professional skills.</p>
+        {% endif %}
+      </section>
+
+      <section class="card">
+        <h2>Certificates</h2>
+        {% if profile.certificates and profile.certificates|length > 0 %}
+          <div id="displayCertificates" class="certificate-grid">
+            {% for item in profile.certificates %}
+              <div class="certificate-card">
+                <p class="certificate-title">{{ item.title if item.title else 'Certificate' }}</p>
+                {% if item.file and item.file.lower().endswith('.pdf') %}
+                  <p><a class="resume-link" href="{{ item.url if item.url else '/static/certificates/' ~ item.file }}" target="_blank" rel="noopener noreferrer">View Certificate PDF</a></p>
+                {% else %}
+                  <a href="{{ item.url if item.url else '/static/certificates/' ~ item.file }}" target="_blank" rel="noopener noreferrer">
+                    <img class="certificate-image" src="{{ item.url if item.url else '/static/certificates/' ~ item.file }}" alt="{{ item.title if item.title else 'Certificate image' }}">
+                  </a>
+                {% endif %}
+              </div>
+            {% endfor %}
+          </div>
+        {% else %}
+          <p id="displayCertificates">Upload your certificates to display them here.</p>
+        {% endif %}
+      </section>
+
+      <section class="card">
+        <h2>Contact</h2>
+        <p>Email: <a id="displayEmail" href="mailto:{{ profile.contact.email if profile.contact and profile.contact.email else 'you@example.com' }}">{{ profile.contact.email if profile.contact and profile.contact.email else 'you@example.com' }}</a></p>
+      </section>
+    </main>
+
+    <footer class="footer">
+      <div class="container">&copy; Mohammed Kaif M - Portfolio</div>
+    </footer>
+
+    <script>
+      (function(){
+        try {
+          const params = new URLSearchParams(window.location.search);
+          if (params.has('saved')) {
+            const img = document.getElementById('heroImage');
+            if (img) {
+              const base = img.src.split('?')[0];
+              img.src = base + '?v=' + Date.now();
+            }
+          }
+        } catch (_e) {}
+      })();
+    </script>
+  </body>
+</html>

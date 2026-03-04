@@ -1,0 +1,80 @@
+{
+  "name": "Mohammed Kaif M",
+  "tagline": "AI intern - Rubixe AI company",
+  "about": "I am Mohammed Kaif M, a graduate engineering student specialized in Artificial Intelligence and Machine Learning with a strong passion for building real-world AI solutions. I have gained four months of industry experience at Rubixe AI, where I worked on practical machine learning and deep learning projects. My key projects include a Dynamic Team Generation System, an AI-Based Early Childhood Development Screening Platform, a Brain Tumor Classification System, and an Emotion-Based Music Recommendation System. I am particularly interested in AI for healthcare, intelligent systems, and scalable data-driven applications that create meaningful social impact and real-world value.",
+  "contact": {
+    "email": "kaifkaif767686@gmail.com"
+  },
+  "experiences": [
+    {
+      "summary": "Rubixe AI Company - AI-Intern:\r\nAt Rubixe AI, I contributed to two major AI-driven projects. In the Dynamic Team Generation System, I developed an intelligent solution that forms optimized teams based on skills, availability, and performance metrics, improving resource allocation and decision-making efficiency. In the AI-Based Early Childhood Development Screening Platform, I helped build a scalable system to identify developmental delays across multiple domains using standardized assessment frameworks. The platform provides automated scoring, real-time risk prediction, and role-based dashboards, enabling early detection, data-driven interventions, and effective monitoring of child development outcomes at scale.",
+      "from": "2026-02-20",
+      "to": "2026-05-20"
+    }
+  ],
+  "projects": [
+    {
+      "title": "AI-based Early Childhood Developmenet Innovation Challenge",
+      "link": "https://github.com/rreh87831-jpg/flutterproject",
+      "description": "The AI-Based Early Childhood Development Innovation Challenge project focused on building a scalable and intelligent screening system to detect developmental delays at an early stage. The platform integrates standardized assessment frameworks aligned with global and national health guidelines. It evaluates multiple developmental domains including Gross Motor, Fine Motor, Language, Cognitive, and Social-Emotional skills. The system provides automated scoring, real-time risk prediction, and role-based dashboards for field workers, supervisors, and administrators. Designed for large-scale deployment, the solution supports data-driven governance, early intervention planning, and improved childhood development outcomes through technology-enabled decision support and analytics."
+    },
+    {
+      "title": "Emotion Based Music Recommendation System",
+      "link": "https://github.com/MOHAMMED-KAIF-M/Emotion-Based-Music-Recommendation-System",
+      "description": "The Emotion Based Music Recommendation System is an AI-powered application that detects human emotions in real time using computer vision and deep learning techniques. The system captures facial expressions through a webcam, analyzes emotional states such as happy, sad, angry, or neutral, and dynamically recommends music that matches the detected mood. It integrates a trained emotion detection model with a responsive web interface for seamless user interaction. Designed using Python, OpenCV, and machine learning frameworks, the system demonstrates real-time prediction, personalized recommendations, and practical application of AI in enhancing user experience."
+    },
+    {
+      "title": "Student Management System",
+      "link": "https://github.com/MOHAMMED-KAIF-M/Student-Management-System",
+      "description": "The Student Management System is a structured software application designed to efficiently manage student records, academic details, attendance, and performance data. The system allows administrators and faculty to add, update, and monitor student information through a centralized database. It includes features such as secure login, record management, attendance tracking, grade management, and report generation. Built using database management systems and backend development technologies, the application improves data organization, reduces manual paperwork, and enhances administrative efficiency. The system ensures accuracy, accessibility, and streamlined communication between students, faculty, and management within an educational institution."
+    },
+    {
+      "title": "Attendence Management System",
+      "link": "https://github.com/MOHAMMED-KAIF-M/Attendence-Managament-System",
+      "description": "The Attendance Management System is a digital solution designed to automate and streamline the process of tracking student or employee attendance. The system enables secure login for administrators and faculty, allowing them to record, update, and monitor attendance records in real time. It stores data in a centralized database and generates detailed reports for performance evaluation and compliance purposes. By reducing manual paperwork and minimizing errors, the system improves efficiency, transparency, and accuracy. The application can be integrated with biometric or web-based interfaces to ensure reliable attendance tracking and effective record management."
+    },
+    {
+      "title": "Pay Roll Management System",
+      "link": "https://github.com/MOHAMMED-KAIF-M/Pay-Roll-Management-System",
+      "description": "The Payroll Management System is a software application designed to automate salary processing and employee compensation management. The system calculates wages based on attendance, working hours, allowances, deductions, and tax policies. It maintains secure employee records, generates payslips, and produces detailed financial reports for management review. By reducing manual calculations and administrative workload, the system ensures accuracy, compliance, and timely salary disbursement. Built using database and backend technologies, the application enhances transparency, minimizes payroll errors, and streamlines financial operations within an organization while maintaining confidentiality and data integrity."
+    },
+    {
+      "title": "Spam Mail Detection System Using ML-NLP",
+      "link": "https://github.com/MOHAMMED-KAIF-M/Spam-Mail-Detection-System-using-ML-NLP",
+      "description": "The Spam Mail Detection System Using ML-NLP is a machine learning-based application designed to classify emails as spam or legitimate messages. The system applies Natural Language Processing techniques such as text preprocessing, tokenization, stop-word removal, and vectorization using methods like TF-IDF. A supervised learning model is trained on labeled email datasets to accurately detect spam patterns and unwanted content. The application improves email security by filtering malicious or irrelevant messages in real time. Built using Python and ML libraries, the system demonstrates practical implementation of text classification, feature engineering, and predictive modeling in cybersecurity applications."
+    }
+  ],
+  "skills": [
+    {
+      "name": "python",
+      "level": "Intermediate",
+      "details": ""
+    },
+    {
+      "name": "Machine Learning",
+      "level": "Intermediate",
+      "details": ""
+    },
+    {
+      "name": "Generative AI",
+      "level": "Intermediate",
+      "details": ""
+    },
+    {
+      "name": "Java",
+      "level": "Intermediate",
+      "details": ""
+    },
+    {
+      "name": "Html,Javascript,CSS",
+      "level": "Intermediate",
+      "details": ""
+    }
+  ],
+  "certificates": [
+    {
+      "title": "Deep Learning",
+      "file": "Deep_Learning_f_87990535.pdf"
+    }
+  ]
+}

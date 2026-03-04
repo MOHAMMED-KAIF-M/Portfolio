@@ -1,0 +1,654 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Edit Profile - Mohammed Kaif M</title>
+    <link rel="stylesheet" href="/static/style.css">
+  </head>
+  <body>
+    <nav class="nav">
+      <div class="container nav-inner">
+        <a class="brand" href="/">Portfolio-Mohammed Kaif M</a>
+        <a class="resume-link nav-pill" href="/">Home</a>
+      </div>
+    </nav>
+
+    <main class="container">
+      <section class="card">
+        <h2>Edit Profile</h2>
+        <form id="editProfileForm" class="profile-form" method="post" action="/save_profile_full" enctype="multipart/form-data" novalidate>
+          <label>Profile Image</label>
+          <div class="image-editor">
+            <div class="image-editor-preview">
+              <canvas id="cropPreview" width="296" height="296"></canvas>
+            </div>
+
+            <div class="image-editor-controls">
+              <input id="imageInput" type="file" name="image" accept="image/*,image/svg+xml">
+              <input id="imageCroppedData" type="hidden" name="image_cropped_data">
+              <p class="crop-hint">Select an image, then drag on preview to move and use mouse wheel/trackpad to zoom.</p>
+              <p id="cropStatus" class="crop-hint"></p>
+            </div>
+          </div>
+
+          <label>Name</label>
+          <input type="text" name="name" value="{{ profile.name }}" class="form-input">
+
+          <label>Tagline</label>
+          <input type="text" name="tagline" value="{{ profile.tagline }}" class="form-input">
+
+          <label>About (HTML allowed)</label>
+          <textarea name="about" class="form-textarea form-textarea-about">{{ profile.about }}</textarea>
+
+          <label>Contact Email</label>
+          <input type="email" name="email" value="{{ profile.contact.email if profile.contact and profile.contact.email else '' }}" class="form-input">
+
+          <label>Experience</label>
+          <input type="hidden" name="experience_list_mode" value="1">
+          <div id="experienceList" class="experience-list"></div>
+          <button id="addExperienceBtn" type="button" class="experience-add-btn resume-link">+ Add experience</button>
+
+          <template id="experienceItemTemplate">
+            <div class="experience-item">
+              <div class="experience-item-header">
+                <span class="experience-item-title">Experience</span>
+                <button type="button" class="experience-remove-btn resume-link">- Remove</button>
+              </div>
+
+              <div class="experience-item-dates">
+                <div class="experience-date-field">
+                  <label>From</label>
+                  <input type="date" name="experience_from[]" class="experience-from-input">
+                </div>
+                <div class="experience-date-field">
+                  <label>To</label>
+                  <input type="date" name="experience_to[]" class="experience-to-input">
+                </div>
+              </div>
+
+              <label>Details</label>
+              <textarea name="experience_summary[]" class="experience-summary-input" rows="4"></textarea>
+            </div>
+          </template>
+
+          <label>Projects</label>
+          <input type="hidden" name="project_list_mode" value="1">
+          <div id="projectList" class="project-list"></div>
+          <button id="addProjectBtn" type="button" class="project-add-btn resume-link">+ Add project</button>
+
+          <template id="projectItemTemplate">
+            <div class="project-item">
+              <div class="project-item-header">
+                <span class="project-item-title">Project</span>
+                <button type="button" class="project-remove-btn resume-link">- Remove</button>
+              </div>
+
+              <label>Project Title</label>
+              <input type="text" name="project_title[]" class="project-title-input">
+
+              <label>Project Link</label>
+              <input type="url" name="project_link[]" class="project-link-input" placeholder="https://example.com">
+
+              <label>Description</label>
+              <textarea name="project_description[]" class="project-description-input" rows="4"></textarea>
+            </div>
+          </template>
+
+          <label>Skills</label>
+          <input type="hidden" name="skill_list_mode" value="1">
+          <div id="skillList" class="skill-list"></div>
+          <button id="addSkillBtn" type="button" class="skill-add-btn resume-link">+ Add skill</button>
+
+          <template id="skillItemTemplate">
+            <div class="skill-item">
+              <div class="skill-item-header">
+                <span class="skill-item-title">Skill</span>
+                <button type="button" class="skill-remove-btn resume-link">- Remove</button>
+              </div>
+
+              <label>Skill Name</label>
+              <input type="text" name="skill_name[]" class="skill-name-input">
+
+              <label>Level</label>
+              <input type="text" name="skill_level[]" class="skill-level-input" placeholder="Beginner / Intermediate / Advanced">
+
+              <label>Details</label>
+              <textarea name="skill_details[]" class="skill-details-input" rows="3"></textarea>
+            </div>
+          </template>
+
+          <label>Certificates</label>
+          <input type="hidden" name="certificate_list_mode" value="1">
+          <div id="certificateListEdit" class="certificate-list-edit">
+            {% if profile.certificates and profile.certificates|length > 0 %}
+              {% for item in profile.certificates %}
+                <div class="certificate-edit-item">
+                  <div class="certificate-edit-header">
+                    <span class="certificate-item-title">Certificate</span>
+                    <button type="button" class="certificate-remove-btn resume-link">- Remove</button>
+                  </div>
+                  <input type="hidden" name="certificate_existing_file[]" value="{{ item.file }}">
+                  <label>Title</label>
+                  <input type="text" name="certificate_existing_title[]" value="{{ item.title }}" class="certificate-title-input">
+                  <a class="resume-link" href="{{ item.url if item.url else '/static/certificates/' ~ item.file }}" target="_blank" rel="noopener noreferrer">View file</a>
+                </div>
+              {% endfor %}
+            {% endif %}
+          </div>
+          <label>New Certificate Uploads</label>
+          <div id="certificateUploadList" class="certificate-upload-list"></div>
+          <button id="addCertificateUploadBtn" type="button" class="certificate-add-btn resume-link">+ Add certificate</button>
+          <template id="certificateUploadItemTemplate">
+            <div class="certificate-upload-item">
+              <div class="certificate-upload-header">
+                <span class="certificate-item-title">New Certificate</span>
+                <button type="button" class="certificate-upload-remove-btn resume-link">- Remove</button>
+              </div>
+              <input type="file" name="certificate_files" class="certificate-upload-file" accept=".pdf,image/*">
+            </div>
+          </template>
+          <p class="crop-hint">Use + to add more certificate uploads and - to remove before saving.</p>
+
+          <div class="form-actions">
+            <button class="cta" type="submit">Save</button>
+            <a class="resume-link nav-pill cancel-btn" href="/">Cancel</a>
+          </div>
+        </form>
+      </section>
+    </main>
+
+    <footer class="footer"><div class="container">&copy; Mohammed Kaif M</div></footer>
+
+    <script>
+      (function () {
+        const form = document.getElementById('editProfileForm');
+        const imageInput = document.getElementById('imageInput');
+        const croppedInput = document.getElementById('imageCroppedData');
+        const previewCanvas = document.getElementById('cropPreview');
+        const previewFrame = document.querySelector('.image-editor-preview');
+        const cropStatus = document.getElementById('cropStatus');
+        const saveBtn = form ? form.querySelector('button[type="submit"]') : null;
+        const experienceList = document.getElementById('experienceList');
+        const addExperienceBtn = document.getElementById('addExperienceBtn');
+        const experienceItemTemplate = document.getElementById('experienceItemTemplate');
+        const initialExperiences = {{ (profile.experiences if profile.experiences else [])|tojson }};
+        const projectList = document.getElementById('projectList');
+        const addProjectBtn = document.getElementById('addProjectBtn');
+        const projectItemTemplate = document.getElementById('projectItemTemplate');
+        const initialProjects = {{ (profile.projects if profile.projects else [])|tojson }};
+        const skillList = document.getElementById('skillList');
+        const addSkillBtn = document.getElementById('addSkillBtn');
+        const skillItemTemplate = document.getElementById('skillItemTemplate');
+        const initialSkills = {{ (profile.skills if profile.skills else [])|tojson }};
+        const certificateListEdit = document.getElementById('certificateListEdit');
+        const certificateUploadList = document.getElementById('certificateUploadList');
+        const addCertificateUploadBtn = document.getElementById('addCertificateUploadBtn');
+        const certificateUploadItemTemplate = document.getElementById('certificateUploadItemTemplate');
+
+        const currentImageUrl = "/static/{{ profile_image if profile_image else 'profile.svg' }}?v={{ profile_image_version if profile_image_version else '0' }}";
+        const MIN_ZOOM = 1;
+        const MAX_ZOOM = 4;
+
+        let activeObjectUrl = null;
+        let hasNewUpload = false;
+        let hasImageEdit = false;
+        let sourceImage = null;
+        let dragState = null;
+        const cropState = {
+          zoom: 1,
+          panX: 0,
+          panY: 0
+        };
+
+        function clamp(value, min, max) {
+          return Math.max(min, Math.min(max, value));
+        }
+
+        function setPreviewInteractionState() {
+          if (!previewFrame) {
+            return;
+          }
+          const active = Boolean(sourceImage);
+          previewFrame.classList.toggle('is-adjustable', active);
+          if (!active) {
+            previewFrame.classList.remove('is-dragging');
+            dragState = null;
+          }
+        }
+
+        function addExperienceItem(values) {
+          if (!experienceList || !experienceItemTemplate) {
+            return;
+          }
+
+          const fragment = experienceItemTemplate.content.cloneNode(true);
+          const itemEl = fragment.querySelector('.experience-item');
+          const summaryInput = fragment.querySelector('.experience-summary-input');
+          const fromInput = fragment.querySelector('.experience-from-input');
+          const toInput = fragment.querySelector('.experience-to-input');
+          const removeBtn = fragment.querySelector('.experience-remove-btn');
+
+          summaryInput.value = values && values.summary ? values.summary : '';
+          fromInput.value = values && values.from ? values.from : '';
+          toInput.value = values && values.to ? values.to : '';
+
+          removeBtn.addEventListener('click', function () {
+            if (itemEl && itemEl.parentNode) {
+              itemEl.parentNode.removeChild(itemEl);
+            }
+          });
+
+          experienceList.appendChild(fragment);
+        }
+
+        function initializeExperienceEditor() {
+          if (!experienceList || !addExperienceBtn) {
+            return;
+          }
+
+          const seedItems = Array.isArray(initialExperiences) && initialExperiences.length
+            ? initialExperiences
+            : [{ summary: '', from: '', to: '' }];
+
+          seedItems.forEach(function (item) {
+            addExperienceItem(item);
+          });
+
+          addExperienceBtn.addEventListener('click', function () {
+            addExperienceItem({ summary: '', from: '', to: '' });
+          });
+        }
+
+        function addProjectItem(values) {
+          if (!projectList || !projectItemTemplate) {
+            return;
+          }
+
+          const fragment = projectItemTemplate.content.cloneNode(true);
+          const itemEl = fragment.querySelector('.project-item');
+          const titleInput = fragment.querySelector('.project-title-input');
+          const linkInput = fragment.querySelector('.project-link-input');
+          const descriptionInput = fragment.querySelector('.project-description-input');
+          const removeBtn = fragment.querySelector('.project-remove-btn');
+
+          titleInput.value = values && values.title ? values.title : '';
+          linkInput.value = values && values.link ? values.link : '';
+          descriptionInput.value = values && values.description ? values.description : '';
+
+          removeBtn.addEventListener('click', function () {
+            if (itemEl && itemEl.parentNode) {
+              itemEl.parentNode.removeChild(itemEl);
+            }
+          });
+
+          projectList.appendChild(fragment);
+        }
+
+        function initializeProjectEditor() {
+          if (!projectList || !addProjectBtn) {
+            return;
+          }
+
+          const seedItems = Array.isArray(initialProjects) && initialProjects.length
+            ? initialProjects
+            : [{ title: '', link: '', description: '' }];
+
+          seedItems.forEach(function (item) {
+            addProjectItem(item);
+          });
+
+          addProjectBtn.addEventListener('click', function () {
+            addProjectItem({ title: '', link: '', description: '' });
+          });
+        }
+
+        function addSkillItem(values) {
+          if (!skillList || !skillItemTemplate) {
+            return;
+          }
+
+          const fragment = skillItemTemplate.content.cloneNode(true);
+          const itemEl = fragment.querySelector('.skill-item');
+          const nameInput = fragment.querySelector('.skill-name-input');
+          const levelInput = fragment.querySelector('.skill-level-input');
+          const detailsInput = fragment.querySelector('.skill-details-input');
+          const removeBtn = fragment.querySelector('.skill-remove-btn');
+
+          nameInput.value = values && values.name ? values.name : '';
+          levelInput.value = values && values.level ? values.level : '';
+          detailsInput.value = values && values.details ? values.details : '';
+
+          removeBtn.addEventListener('click', function () {
+            if (itemEl && itemEl.parentNode) {
+              itemEl.parentNode.removeChild(itemEl);
+            }
+          });
+
+          skillList.appendChild(fragment);
+        }
+
+        function initializeSkillEditor() {
+          if (!skillList || !addSkillBtn) {
+            return;
+          }
+
+          const seedItems = Array.isArray(initialSkills) && initialSkills.length
+            ? initialSkills
+            : [{ name: '', level: '', details: '' }];
+
+          seedItems.forEach(function (item) {
+            addSkillItem(item);
+          });
+
+          addSkillBtn.addEventListener('click', function () {
+            addSkillItem({ name: '', level: '', details: '' });
+          });
+        }
+
+        function initializeCertificateEditor() {
+          if (!certificateListEdit) {
+            return;
+          }
+
+          const removeButtons = certificateListEdit.querySelectorAll('.certificate-remove-btn');
+          removeButtons.forEach(function (btn) {
+            btn.addEventListener('click', function () {
+              const item = btn.closest('.certificate-edit-item');
+              if (item && item.parentNode) {
+                item.parentNode.removeChild(item);
+              }
+            });
+          });
+        }
+
+        function addCertificateUploadItem() {
+          if (!certificateUploadList || !certificateUploadItemTemplate) {
+            return;
+          }
+
+          const fragment = certificateUploadItemTemplate.content.cloneNode(true);
+          const item = fragment.querySelector('.certificate-upload-item');
+          const removeBtn = fragment.querySelector('.certificate-upload-remove-btn');
+          removeBtn.addEventListener('click', function () {
+            if (item && item.parentNode) {
+              item.parentNode.removeChild(item);
+            }
+          });
+          certificateUploadList.appendChild(fragment);
+        }
+
+        function initializeCertificateUploadEditor() {
+          if (!certificateUploadList || !addCertificateUploadBtn) {
+            return;
+          }
+
+          addCertificateUploadItem();
+
+          addCertificateUploadBtn.addEventListener('click', function () {
+            addCertificateUploadItem();
+          });
+        }
+
+        function clearPreview() {
+          const ctx = previewCanvas.getContext('2d');
+          ctx.clearRect(0, 0, previewCanvas.width, previewCanvas.height);
+          ctx.fillStyle = '#fff2f5';
+          ctx.fillRect(0, 0, previewCanvas.width, previewCanvas.height);
+        }
+
+        function resetCropState() {
+          cropState.zoom = 1;
+          cropState.panX = 0;
+          cropState.panY = 0;
+        }
+
+        function getScaledSize(width, height, zoom) {
+          const baseScale = Math.max(width / sourceImage.width, height / sourceImage.height);
+          const scale = baseScale * zoom;
+          return {
+            drawWidth: sourceImage.width * scale,
+            drawHeight: sourceImage.height * scale
+          };
+        }
+
+        function getDrawLayout(width, height) {
+          const scaled = getScaledSize(width, height, cropState.zoom);
+          const baseX = (width - scaled.drawWidth) / 2;
+          const baseY = (height - scaled.drawHeight) / 2;
+          const minX = Math.min(0, width - scaled.drawWidth);
+          const maxX = Math.max(0, width - scaled.drawWidth);
+          const minY = Math.min(0, height - scaled.drawHeight);
+          const maxY = Math.max(0, height - scaled.drawHeight);
+
+          const x = clamp(baseX + cropState.panX, minX, maxX);
+          const y = clamp(baseY + cropState.panY, minY, maxY);
+          return {
+            x: x,
+            y: y,
+            drawWidth: scaled.drawWidth,
+            drawHeight: scaled.drawHeight,
+            baseX: baseX,
+            baseY: baseY
+          };
+        }
+
+        function drawToCanvas(targetCanvas) {
+          const ctx = targetCanvas.getContext('2d');
+          const width = targetCanvas.width;
+          const height = targetCanvas.height;
+          ctx.clearRect(0, 0, width, height);
+          ctx.fillStyle = '#fff2f5';
+          ctx.fillRect(0, 0, width, height);
+
+          if (!sourceImage) {
+            return;
+          }
+
+          const layout = getDrawLayout(width, height);
+          cropState.panX = layout.x - layout.baseX;
+          cropState.panY = layout.y - layout.baseY;
+
+          ctx.imageSmoothingEnabled = true;
+          ctx.imageSmoothingQuality = 'high';
+          ctx.drawImage(sourceImage, layout.x, layout.y, layout.drawWidth, layout.drawHeight);
+        }
+
+        function refreshPreview() {
+          drawToCanvas(previewCanvas);
+        }
+
+        function getCanvasPointerPosition(evt) {
+          const rect = previewCanvas.getBoundingClientRect();
+          return {
+            x: (evt.clientX - rect.left) * (previewCanvas.width / rect.width),
+            y: (evt.clientY - rect.top) * (previewCanvas.height / rect.height)
+          };
+        }
+
+        function beginDrag(evt) {
+          if (!sourceImage) {
+            return;
+          }
+          if (evt.pointerType === 'mouse' && evt.button !== 0) {
+            return;
+          }
+
+          dragState = {
+            pointerId: evt.pointerId,
+            startX: evt.clientX,
+            startY: evt.clientY,
+            startPanX: cropState.panX,
+            startPanY: cropState.panY
+          };
+
+          if (previewCanvas.setPointerCapture) {
+            previewCanvas.setPointerCapture(evt.pointerId);
+          }
+          if (previewFrame) {
+            previewFrame.classList.add('is-dragging');
+          }
+          evt.preventDefault();
+        }
+
+        function moveDrag(evt) {
+          if (!dragState || evt.pointerId !== dragState.pointerId) {
+            return;
+          }
+
+          cropState.panX = dragState.startPanX + (evt.clientX - dragState.startX);
+          cropState.panY = dragState.startPanY + (evt.clientY - dragState.startY);
+          hasImageEdit = true;
+          refreshPreview();
+        }
+
+        function endDrag(evt) {
+          if (!dragState || evt.pointerId !== dragState.pointerId) {
+            return;
+          }
+          if (previewCanvas.releasePointerCapture) {
+            try {
+              previewCanvas.releasePointerCapture(evt.pointerId);
+            } catch (_err) {
+              // no-op
+            }
+          }
+          dragState = null;
+          if (previewFrame) {
+            previewFrame.classList.remove('is-dragging');
+          }
+        }
+
+        function handlePreviewWheel(evt) {
+          if (!sourceImage) {
+            return;
+          }
+          evt.preventDefault();
+
+          const pointer = getCanvasPointerPosition(evt);
+          const oldLayout = getDrawLayout(previewCanvas.width, previewCanvas.height);
+          const oldZoom = cropState.zoom;
+          const zoomFactor = Math.exp(-evt.deltaY * 0.0015);
+          const newZoom = clamp(oldZoom * zoomFactor, MIN_ZOOM, MAX_ZOOM);
+          if (Math.abs(newZoom - oldZoom) < 0.0001) {
+            return;
+          }
+
+          const relX = clamp((pointer.x - oldLayout.x) / oldLayout.drawWidth, 0, 1);
+          const relY = clamp((pointer.y - oldLayout.y) / oldLayout.drawHeight, 0, 1);
+
+          cropState.zoom = newZoom;
+          const scaledNew = getScaledSize(previewCanvas.width, previewCanvas.height, cropState.zoom);
+          const baseXNew = (previewCanvas.width - scaledNew.drawWidth) / 2;
+          const baseYNew = (previewCanvas.height - scaledNew.drawHeight) / 2;
+          const xNew = pointer.x - (relX * scaledNew.drawWidth);
+          const yNew = pointer.y - (relY * scaledNew.drawHeight);
+          cropState.panX = xNew - baseXNew;
+          cropState.panY = yNew - baseYNew;
+          hasImageEdit = true;
+          refreshPreview();
+        }
+
+        function loadSource(src) {
+          const img = new Image();
+          img.onload = function () {
+            sourceImage = img;
+            refreshPreview();
+            setPreviewInteractionState();
+          };
+          img.onerror = function () {
+            sourceImage = null;
+            clearPreview();
+            setPreviewInteractionState();
+            cropStatus.textContent = 'Unable to preview this file.';
+          };
+          img.src = src;
+        }
+
+        initializeExperienceEditor();
+        initializeProjectEditor();
+        initializeSkillEditor();
+        initializeCertificateEditor();
+        initializeCertificateUploadEditor();
+        clearPreview();
+        loadSource(currentImageUrl);
+        cropStatus.textContent = 'Drag to adjust current image, or choose a new image.';
+
+        previewCanvas.addEventListener('wheel', handlePreviewWheel, { passive: false });
+        previewCanvas.addEventListener('pointerdown', beginDrag);
+        previewCanvas.addEventListener('pointermove', moveDrag);
+        previewCanvas.addEventListener('pointerup', endDrag);
+        previewCanvas.addEventListener('pointercancel', endDrag);
+        previewCanvas.addEventListener('pointerleave', endDrag);
+
+        imageInput.addEventListener('change', function () {
+          const file = imageInput.files && imageInput.files[0];
+          croppedInput.value = '';
+
+          if (activeObjectUrl) {
+            URL.revokeObjectURL(activeObjectUrl);
+            activeObjectUrl = null;
+          }
+
+          if (!file) {
+            hasNewUpload = false;
+            hasImageEdit = false;
+            resetCropState();
+            cropStatus.textContent = 'Drag to adjust current image, or choose a new image.';
+            loadSource(currentImageUrl);
+            return;
+          }
+
+          if (!file.type || file.type.indexOf('image/') !== 0) {
+            setPreviewInteractionState();
+            cropStatus.textContent = 'Please choose an image file.';
+            return;
+          }
+
+          hasNewUpload = true;
+          hasImageEdit = true;
+          resetCropState();
+          activeObjectUrl = URL.createObjectURL(file);
+          loadSource(activeObjectUrl);
+          cropStatus.textContent = 'Drag image to move. Scroll wheel/trackpad to zoom, then click Save.';
+        });
+
+        form.addEventListener('submit', function (evt) {
+          // when the form is submitted we only need to populate the hidden
+          // cropped-data field; let the browser perform the POST and follow the
+          // redirect. this removes complexity and ensures the user is redirected
+          // properly.
+          if (sourceImage) {
+            try {
+              const exportCanvas = document.createElement('canvas');
+              exportCanvas.width = 800;
+              exportCanvas.height = 800;
+              drawToCanvas(exportCanvas);
+              croppedInput.value = exportCanvas.toDataURL('image/jpeg', 0.92);
+            } catch (_err) {
+              croppedInput.value = '';
+            }
+          } else {
+            croppedInput.value = '';
+          }
+
+          if (saveBtn) {
+            saveBtn.disabled = true;
+            saveBtn.textContent = 'Saving...';
+          }
+          if (cropStatus) {
+            cropStatus.textContent = 'Saving profile...';
+          }
+          // no preventDefault – normal form submission will happen
+        });
+
+        window.addEventListener('beforeunload', function () {
+          if (activeObjectUrl) {
+            URL.revokeObjectURL(activeObjectUrl);
+            activeObjectUrl = null;
+          }
+        });
+      })();
+    </script>
+  </body>
+</html>
